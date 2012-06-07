@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3F7EDB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Csv2Xml", "Samples\Csv2Xml\Csv2Xml.csproj", "{54731E71-171C-48AF-A31F-3C0AA209144F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateActivityReport", "Samples\GenerateActivityReport\GenerateActivityReport.csproj", "{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,16 @@ Global
 		{54731E71-171C-48AF-A31F-3C0AA209144F}.Release|Mixed Platforms.Build.0 = Release|x86
 		{54731E71-171C-48AF-A31F-3C0AA209144F}.Release|x86.ActiveCfg = Release|x86
 		{54731E71-171C-48AF-A31F-3C0AA209144F}.Release|x86.Build.0 = Release|x86
+		{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}.Debug|x86.ActiveCfg = Debug|x86
+		{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}.Debug|x86.Build.0 = Debug|x86
+		{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}.Release|Any CPU.ActiveCfg = Release|x86
+		{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}.Release|Mixed Platforms.Build.0 = Release|x86
+		{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}.Release|x86.ActiveCfg = Release|x86
+		{D2E617D0-F503-4DB9-BAF1-20B3EECE398B}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
