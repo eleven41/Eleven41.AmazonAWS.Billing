@@ -250,6 +250,12 @@ namespace Eleven41.AmazonAWS.Billing
 			}
 			else if (usageType.StartsWith("UGW1-"))
 			{
+				code = "us-gov-west-1";
+				name = "GovCloud (US) Region";
+				item.UsageType = item.UsageType.Substring(5);
+			}
+			else if (usageType.StartsWith("SAE1-"))
+			{
 				code = "sa-east-1";
 				name = "South America (Sao Paulo) Region";
 				item.UsageType = item.UsageType.Substring(5);
