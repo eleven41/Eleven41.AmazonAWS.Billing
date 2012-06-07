@@ -28,7 +28,7 @@ namespace Csv2Xml
 				foreach (var invoice in account.Invoices)
 				{
 					Console.WriteLine("\tInvoice: {0}", invoice.InvoiceId);
-					Console.WriteLine("\tInvoice Total: {0}", invoice.Total);
+					Console.WriteLine("\tInvoice Total: ${0:F2}", invoice.Total);
 				}
 			}
 			Console.WriteLine("Statement Total: ${0:F2}", statement.Total);
