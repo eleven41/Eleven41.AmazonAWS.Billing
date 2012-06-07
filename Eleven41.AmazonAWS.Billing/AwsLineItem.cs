@@ -28,5 +28,11 @@ namespace Eleven41.AmazonAWS.Billing
 
 		[XmlAttribute]
 		public string RegionName { get; set; }
+
+		[XmlAttribute]
+		public string Category { get; set; }
+
+		[XmlAttribute]
+		public string CategoryName { get; set; }
 	}
 }

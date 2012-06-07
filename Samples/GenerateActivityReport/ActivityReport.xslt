@@ -65,6 +65,10 @@
 					padding: 1px 4px 1px 4px;
 					}
 
+					.bgyel {
+					background-color: #FEFEE5;
+					}
+
 					.txtxxsm {
 					font-size: xx-small;
 					}
@@ -149,23 +153,49 @@
 					$<xsl:value-of select="format-number(sum(Items/AwsLineItem/@CostBeforeTaxes), '#,###,##0.00')"/>
 			</td>
 		</tr>
-
-		<xsl:variable name="sortedcopy">
+		
+		<xsl:variable name="sorteditems">
 			<xsl:for-each select="Items/AwsLineItem">
 				<xsl:sort select="@Region" order="ascending"/>
+				<xsl:sort select="@Category" order="ascending"/>
 				<xsl:copy-of select="current()"/>
 			</xsl:for-each>
 		</xsl:variable>
-		<xsl:variable name="relItems" select="msxml:node-set($sortedcopy)" />
+		<xsl:variable name="relItems" select="msxml:node-set($sorteditems)" />
 		
 		<xsl:for-each select="$relItems/AwsLineItem">
-			<xsl:sort select="@Region"/>
 
-			<xsl:if test="not(preceding::AwsLineItem/@Region = @Region)">
+			<xsl:variable name="renderRegion">
+				<xsl:choose>
+					<xsl:when test="not(preceding::AwsLineItem[1]/@Region = @Region)">1</xsl:when>
+					<xsl:otherwise>0</xsl:otherwise>
+				</xsl:choose>
+
+			</xsl:variable>
+			<xsl:variable name="renderCategory">
+				<xsl:choose>
+					<xsl:when test="not(preceding::AwsLineItem[1]/@Region = @Region)">1</xsl:when>
+					<xsl:when test="not(preceding::AwsLineItem[1]/@Category = @Category)">1</xsl:when>
+					<xsl:otherwise>0</xsl:otherwise>
+				</xsl:choose>
+			</xsl:variable>
+
+			<xsl:if test="$renderRegion = 1">
 				<xsl:if test="@Region">
 					<tr>
 						<td class="bordgreybot bold txtxsm" colspan="5">
 							<xsl:value-of select="@RegionName" />
+						</td>
+					</tr>
+				</xsl:if>
+			</xsl:if>
+			
+			<xsl:if test="$renderCategory = 1">
+				<xsl:if test="@Category">
+					<tr>
+						<td class="bordgreybot" width="14"> </td>
+						<td class="bordgreybot bold txtxsm" colspan="4">
+							<xsl:value-of select="@CategoryName" />
 						</td>
 					</tr>
 				</xsl:if>
@@ -186,7 +216,7 @@
 			</tr>
 			
 		</xsl:for-each>
-		
+
 	</xsl:template>
 
 </xsl:stylesheet>

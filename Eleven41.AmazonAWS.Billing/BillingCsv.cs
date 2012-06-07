@@ -134,8 +134,9 @@ namespace Eleven41.AmazonAWS.Billing
 							item.CostBeforeTaxes = lineItem.CostBeforeTaxes.Value;
 							item.UsageType = lineItem.UsageType;
 
-							// Find an appropriate region for this item/product.
+							// Find an appropriate region and category for this item/product.
 							SetItemRegion(item, product);
+							SetItemCategory(item, product, lineItem.Operation);
 							
 							product.Items.Add(item);
 						}
@@ -244,6 +245,59 @@ namespace Eleven41.AmazonAWS.Billing
 
 			item.Region = code;
 			item.RegionName = name;
+		}
+
+		private static void SetItemCategory(AwsLineItem item, AwsProduct product, string operation)
+		{
+			if (product.ProductCode != "AmazonEC2")
+				return;
+
+			string usageType = item.UsageType;
+
+			string code = null;
+			string name = null;
+
+			if (usageType.StartsWith("EBS:"))
+			{
+				code = "EBS";
+				name = "Amazon EC2 EBS";
+				item.UsageType = item.UsageType.Substring(4);
+			}
+			else if (usageType.StartsWith("CW:"))
+			{
+				code = "CW";
+				name = "Amazon CloudWatch";
+				item.UsageType = item.UsageType.Substring(3);
+			}
+			else if (usageType.StartsWith("ElasticIP:"))
+			{
+				code = "ElasticIP";
+				name = "Elastic IP Addresses";
+				item.UsageType = item.UsageType.Substring(10);
+			}
+			else if (operation == "LoadBalancing")
+			{
+				code = operation;
+				name = "Elastic Load Balancer";
+			}
+			else if (operation == "RunInstances")
+			{
+				code = operation;
+				name = "Amazon EC2 running Linux/UNIX";
+			}
+			else if (operation == "RunInstances:0002")
+			{
+				code = operation;
+				name = "Amazon EC2 running Windows";
+			}
+			else if (operation == "RunInstances:0006")
+			{
+				code = operation;
+				name = "Amazon EC2 running Windows with SQL Server";
+			}
+
+			item.Category = code;
+			item.CategoryName = name;
 		}
 
 		// Format the specified number to 0, 3 or 6 decimal digits as necessary.
