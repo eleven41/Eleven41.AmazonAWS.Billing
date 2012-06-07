@@ -116,6 +116,7 @@ namespace Eleven41.AmazonAWS.Billing
 
 						// Create our product object
 						AwsProduct product = new AwsProduct();
+						product.Items = new List<AwsLineItem>();
 						product.ProductCode = productCode;
 						product.ProductName = productName;
 						invoice.Products.Add(product);
@@ -123,9 +124,6 @@ namespace Eleven41.AmazonAWS.Billing
 						// For each line item
 						//  create a line item object
 						//  and populate it's data.
-						//  See if there needs to be a region
-						//  for the line item.  If so, add it to the appropriate region.
-						//  Otherwise, add it to the non-region items for the product.
 						foreach (var lineItem in productLineItems)
 						{
 							// Create our line item object and fill it with data
@@ -136,25 +134,10 @@ namespace Eleven41.AmazonAWS.Billing
 							item.CostBeforeTaxes = lineItem.CostBeforeTaxes.Value;
 							item.UsageType = lineItem.UsageType;
 
-							// Find and/or create an appropriate region for this item/product.
-							AwsRegion region = FindOrCreateItemRegion(item, product);
-
-							// Some products don't use regions (eg. Route53).
-							// In these cases, region == null, so we
-							// add the line item to the product's list of non-region items.
+							// Find an appropriate region for this item/product.
+							SetItemRegion(item, product);
 							
-							if (region != null)
-							{
-								if (region.Items == null)
-									region.Items = new List<AwsLineItem>();
-								region.Items.Add(item);
-							}
-							else
-							{
-								if (product.NonRegionItems == null)
-									product.NonRegionItems = new List<AwsLineItem>();
-								product.NonRegionItems.Add(item);
-							}
+							product.Items.Add(item);
 						}
 					}
 
@@ -191,13 +174,13 @@ namespace Eleven41.AmazonAWS.Billing
 		// regions.  If one is found, then return the existing item.
 		// If one is not found, create one, add it to the product's list, and return it.
 		// Some products don't use regions.  In these cases, return null.
-		private static AwsRegion FindOrCreateItemRegion(AwsLineItem item, AwsProduct product)
+		private static void SetItemRegion(AwsLineItem item, AwsProduct product)
 		{
 			// These products don't use regions
 			if (product.ProductCode == "AmazonRoute53")
-				return null;
+				return;
 			else if (product.ProductCode == "AmazonSES")
-				return null;
+				return;
 
 			string usageType = item.UsageType;
 
@@ -259,21 +242,8 @@ namespace Eleven41.AmazonAWS.Billing
 				item.UsageType = item.UsageType.Substring(5);
 			}
 
-			AwsRegion region = null;
-			if (product.Regions != null)
-				region = product.Regions.Where(r => r.RegionCode == code).Select(r => r).FirstOrDefault();
-			if (region == null)
-			{
-				region = new AwsRegion()
-				{
-					RegionCode = code,
-					RegionName = name
-				};
-				if (product.Regions == null)
-					product.Regions = new List<AwsRegion>();
-				product.Regions.Add(region);
-			}
-			return region;
+			item.Region = code;
+			item.RegionName = name;
 		}
 
 		// Format the specified number to 0, 3 or 6 decimal digits as necessary.

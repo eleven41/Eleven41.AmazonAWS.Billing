@@ -64,7 +64,6 @@
     <Compile Include="AwsInvoice.cs" />
     <Compile Include="AwsLineItem.cs" />
     <Compile Include="AwsProduct.cs" />
-    <Compile Include="AwsRegion.cs" />
     <Compile Include="AwsStatement.cs" />
     <Compile Include="BillingCsv.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

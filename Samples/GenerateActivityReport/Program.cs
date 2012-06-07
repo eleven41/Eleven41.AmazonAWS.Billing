@@ -34,34 +34,41 @@ namespace GenerateActivityReport
 
 		static void WriteHtml(Eleven41.AmazonAWS.Billing.AwsStatement statement, string file)
 		{
-			string xsltFile = @"ActivityReport.xslt";
-
-			// Serialize the statement to XML first
-			System.IO.MemoryStream xmlStream = new System.IO.MemoryStream();
-			SerializeToStream(statement, xmlStream);
-			xmlStream.Seek(0, System.IO.SeekOrigin.Begin);
-
-			// IF we already have a file, then delete it
-			if (System.IO.File.Exists(file))
-				System.IO.File.Delete(file);
-
-			// Open the target file for writing
-			using (var resultStream = System.IO.File.OpenWrite(file))
+			try
 			{
-				try
-				{
-					XPathDocument xPathDoc = new XPathDocument(xmlStream);
+				string xsltFile = @"ActivityReport.xslt";
 
-					XslTransform transform = new XslTransform();
-					transform.Load(xsltFile);
+				// Serialize the statement to XML first
+				System.IO.MemoryStream xmlStream = new System.IO.MemoryStream();
+				SerializeToStream(statement, xmlStream);
+				xmlStream.Seek(0, System.IO.SeekOrigin.Begin);
 
-					XmlTextWriter writer = new XmlTextWriter(resultStream, System.Text.Encoding.UTF8);
-					transform.Transform(xPathDoc, null, writer);
-				}
-				finally
+				// IF we already have a file, then delete it
+				if (System.IO.File.Exists(file))
+					System.IO.File.Delete(file);
+
+				// Open the target file for writing
+				using (var resultStream = System.IO.File.OpenWrite(file))
 				{
-					resultStream.Close();
+					try
+					{
+						XPathDocument xPathDoc = new XPathDocument(xmlStream);
+
+						XslTransform transform = new XslTransform();
+						transform.Load(xsltFile);
+
+						XmlTextWriter writer = new XmlTextWriter(resultStream, System.Text.Encoding.UTF8);
+						transform.Transform(xPathDoc, null, writer);
+					}
+					finally
+					{
+						resultStream.Close();
+					}
 				}
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("Error: {0}", e.Message);
 			}
 		}
 	}

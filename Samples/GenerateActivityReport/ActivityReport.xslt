@@ -1,8 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:msxsl="urn:schemas-microsoft-com:xslt" exclude-result-prefixes="msxsl"
+								xmlns:msxml="urn:schemas-microsoft-com:xslt" 
 >
-    <xsl:output method="xml" indent="yes"/>
+  <xsl:output method="html" indent="yes"/>
 
 	<xsl:template match="/">
 		<html>
@@ -124,10 +125,10 @@
 			<tbody>
 				<tr>
 					<td class="taupeheader bordgreybot bordgreytop" colspan="5">
-						AWS Service Charges
 						<span class="right">
 							$<xsl:value-of select="format-number(@Total, '#,###,##0.00')"/>
 						</span>
+						AWS Service Charges
 					</td>
 				</tr>
 				<xsl:apply-templates select="Products/AwsProduct" />
@@ -145,43 +146,47 @@
 				</span>
 			</td>
 			<td class="bold bordgreybot alignrt" style="font-size: 12px">
-					$<xsl:value-of select="format-number(sum(Regions/AwsRegion/Items/AwsLineItem/@CostBeforeTaxes) + sum(NonRegionItems/AwsLineItem/@CostBeforeTaxes), '#,###,##0.00')"/>
+					$<xsl:value-of select="format-number(sum(Items/AwsLineItem/@CostBeforeTaxes), '#,###,##0.00')"/>
 			</td>
 		</tr>
 
-		<xsl:apply-templates select="Regions/AwsRegion" />
-		<xsl:apply-templates select="NonRegionItems/AwsLineItem" />
+		<xsl:variable name="sortedcopy">
+			<xsl:for-each select="Items/AwsLineItem">
+				<xsl:sort select="@Region" order="ascending"/>
+				<xsl:copy-of select="current()"/>
+			</xsl:for-each>
+		</xsl:variable>
+		<xsl:variable name="relItems" select="msxml:node-set($sortedcopy)" />
+		
+		<xsl:for-each select="$relItems/AwsLineItem">
+			<xsl:sort select="@Region"/>
+
+			<xsl:if test="not(preceding::AwsLineItem/@Region = @Region)">
+				<xsl:if test="@Region">
+					<tr>
+						<td class="bordgreybot bold txtxsm" colspan="5">
+							<xsl:value-of select="@RegionName" />
+						</td>
+					</tr>
+				</xsl:if>
+			</xsl:if>
+
+			<tr>
+				<td class="bordgreybot" width="14"> </td>
+				<td class="bordgreybot txtxxsm" width="10%"> </td>
+				<td class="bordgreybot txtxsm">
+					<xsl:value-of select="@Description"/>
+				</td>
+				<td class="bordgreybot txtxsm">
+					<xsl:value-of select="@FormattedUsageQuantity"/>
+				</td>
+				<td class="bordgreybot txtxsm alignrt">
+					$<xsl:value-of select="format-number(@CostBeforeTaxes, '#,###,##0.00')"/>
+				</td>
+			</tr>
+			
+		</xsl:for-each>
 		
 	</xsl:template>
 
-	<xsl:template match="AwsRegion">
-
-		<tr>
-			<td class="bordgreybot bold txtxsm" colspan="5">
-				<xsl:value-of select="@RegionName"/>
-			</td>
-		</tr>
-
-		<xsl:apply-templates select="Items/AwsLineItem" />
-
-	</xsl:template>
-
-	<xsl:template match="AwsLineItem">
-
-		<tr>
-			<td class="bordgreybot" width="14"> </td>
-			<td class="bordgreybot txtxxsm" width="10%"> </td>
-			<td class="bordgreybot txtxsm">
-				<xsl:value-of select="@Description"/>
-			</td>
-			<td class="bordgreybot txtxsm">
-				<xsl:value-of select="@FormattedUsageQuantity"/>
-			</td>
-			<td class="bordgreybot txtxsm alignrt">
-				<xsl:value-of select="format-number(@CostBeforeTaxes, '#,###,##0.00')"/>
-			</td>
-		</tr>
-
-	</xsl:template>
-	
 </xsl:stylesheet>

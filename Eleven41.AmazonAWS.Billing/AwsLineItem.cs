@@ -22,5 +22,11 @@ namespace Eleven41.AmazonAWS.Billing
 
 		[XmlAttribute]
 		public double CostBeforeTaxes { get; set; }
+
+		[XmlAttribute]
+		public string Region { get; set; }
+
+		[XmlAttribute]
+		public string RegionName { get; set; }
 	}
 }
