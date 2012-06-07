@@ -10,3 +10,24 @@ Copyright (C) 2012, Eleven41 Software
 
 * Visual Studio 2010
 
+## WHAT IT DOES
+
+This library will process an Amazon Web Services billing CSV file and generate an object model based on the data.
+
+* Statement
+ * Account
+  * Invoice
+   * Product
+    * Region
+     * Line items
+    * Non-region Line Items
+     
+
+The goal is to get the object model in a format where the activity reports can be re-created.
+
+Currently, linked accounts are ignored.
+
+## MORE INFORMATION
+
+Additional information can be found in the [Wiki](https://github.com/eleven41/Eleven41.AmazonAWS.Billing/wiki) including
+assumptions and assertions.

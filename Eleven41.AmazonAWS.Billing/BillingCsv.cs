@@ -9,6 +9,8 @@ namespace Eleven41.AmazonAWS.Billing
 {
 	public static class BillingCsv
 	{
+		// Opens the specified file and processes the CSV data into
+		// an AwsStatement object.
 		public static AwsStatement ReadFile(string file)
 		{
 			using (var reader = new System.IO.StreamReader(file))
@@ -24,6 +26,8 @@ namespace Eleven41.AmazonAWS.Billing
 			}
 		}
 
+		// Processes the specified stream as CSV data and creates
+		// an AwsStatement object.
 		public static AwsStatement ReadStream(System.IO.Stream stream)
 		{
 			using (var reader = new System.IO.StreamReader(stream))
@@ -41,53 +45,90 @@ namespace Eleven41.AmazonAWS.Billing
 
 		private static AwsStatement Read(System.IO.TextReader reader)
 		{
+			// Split the CSV data into individual line item records
 			var items = ParseCsv(reader);
 
+			// Create our resulting statement object
 			AwsStatement statement = new AwsStatement();
 			statement.Accounts = new List<AwsAccount>();
 
+			// Get a list of the distinct payer accounts in the data
 			var payerAccounts = items.Where(i => !String.IsNullOrEmpty(i.PayerAccountID)).Select(i => i.PayerAccountID).Distinct();
 
+			// For each account, 
+			//  create an account object
+			//  add it to the statement
+			//  and fill it with data
 			foreach (var accountId in payerAccounts)
 			{
+				// Get the items that apply to this account
 				var accountItems = items.Where(i => i.PayerAccountID == accountId);
 
+				// Create an account object
 				AwsAccount account = new AwsAccount();
 				account.Invoices = new List<AwsInvoice>();
 				account.AccountId = accountId;
 				statement.Accounts.Add(account);
 
+				// Get the list of invoices from the items which
+				// apply to the current account
 				var invoiceIds = accountItems.Where(i => !String.IsNullOrEmpty(i.InvoiceID)).Select(i => i.InvoiceID).Distinct();
 
+				// For each invoice
+				//  create an invoice object
+				//  add it to the account object
+				//  and fill it with data
 				foreach (var invoiceId in invoiceIds)
 				{
+					// Get the list of items for the current account 
+					// and the current invoice
 					var invoiceItems = accountItems.Where(i => i.InvoiceID == invoiceId).Select(i => i);
+					System.Diagnostics.Debug.Assert(invoiceItems.Count() > 0);
 
+					// Create an invoice object
 					AwsInvoice invoice = new AwsInvoice();
 					invoice.InvoiceId = invoiceId;
 					invoice.Products = new List<AwsProduct>();
 					invoice.InvoiceDate = invoiceItems.First().InvoiceDate.Value;
 					account.Invoices.Add(invoice);
 
+					// Get the line items for this invoice
 					var lineItems = invoiceItems
 						.Where(i => i.RecordType == "PayerLineItem")
 						.Select(i => i);
 
+					// Get the list of unique products used 
+					// by this invoice
 					var productCodes = lineItems.Select(i => i.ProductCode).Distinct().OrderBy(i => i);
 
+					// For each product
+					//  create a product object
+					//  add it to the invoice
+					//  and fill it with data
 					foreach (var productCode in productCodes)
 					{
+						// Get the list of line items which only apply to this product
 						var productLineItems = lineItems.Where(i => i.ProductCode == productCode).Select(i => i).OrderBy(i => i.UsageType);
+						System.Diagnostics.Debug.Assert(productLineItems.Count() > 0);
 
+						// We need a product name, so get it from one of the items
 						string productName = productLineItems.First().ProductName;
 
+						// Create our product object
 						AwsProduct product = new AwsProduct();
 						product.ProductCode = productCode;
 						product.ProductName = productName;
 						invoice.Products.Add(product);
 
+						// For each line item
+						//  create a line item object
+						//  and populate it's data.
+						//  See if there needs to be a region
+						//  for the line item.  If so, add it to the appropriate region.
+						//  Otherwise, add it to the non-region items for the product.
 						foreach (var lineItem in productLineItems)
 						{
+							// Create our line item object and fill it with data
 							AwsLineItem item = new AwsLineItem();
 							item.Description = lineItem.ItemDescription;
 							item.UsageQuantity = lineItem.UsageQuantity.Value;
@@ -95,8 +136,13 @@ namespace Eleven41.AmazonAWS.Billing
 							item.CostBeforeTaxes = lineItem.CostBeforeTaxes.Value;
 							item.UsageType = lineItem.UsageType;
 
+							// Find and/or create an appropriate region for this item/product.
 							AwsRegion region = FindOrCreateItemRegion(item, product);
 
+							// Some products don't use regions (eg. Route53).
+							// In these cases, region == null, so we
+							// add the line item to the product's list of non-region items.
+							
 							if (region != null)
 							{
 								if (region.Items == null)
@@ -112,6 +158,8 @@ namespace Eleven41.AmazonAWS.Billing
 						}
 					}
 
+					// Try to find an invoice total amongst the chaos.
+					// If one is found, then save some of it's data
 					var invoiceTotal = invoiceItems.Where(i => i.RecordType == "InvoiceTotal").Select(i => i).FirstOrDefault();
 					if (invoiceTotal != null)
 					{
@@ -125,6 +173,8 @@ namespace Eleven41.AmazonAWS.Billing
 				// Account total?
 			}
 
+			// Try to find an statement total amongst the chaos.
+			// If one is found, then save some of it's data
 			var statementTotal = items.Where(i => i.RecordType == "StatementTotal").Select(i => i).FirstOrDefault();
 			if (statementTotal != null)
 			{
@@ -137,6 +187,10 @@ namespace Eleven41.AmazonAWS.Billing
 			return statement;
 		}
 
+		// Finds an appropriate region for the supplied item in the product's list of
+		// regions.  If one is found, then return the existing item.
+		// If one is not found, create one, add it to the product's list, and return it.
+		// Some products don't use regions.  In these cases, return null.
 		private static AwsRegion FindOrCreateItemRegion(AwsLineItem item, AwsProduct product)
 		{
 			// These products don't use regions
@@ -151,7 +205,7 @@ namespace Eleven41.AmazonAWS.Billing
 
 			// Default to US East
 			string code = "us-east-1";
-			string name = "US East (Northern Virginia) Region";
+			string name = "US East (Virginia) Region";
 
 			// S3 uses a different name for US East
 			if (product.ProductCode == "AmazonS3")
@@ -159,10 +213,15 @@ namespace Eleven41.AmazonAWS.Billing
 
 			// If usage type starts with special prefixes, then that means
 			// it belongs to a particular region that is not US East.
-			if (usageType.StartsWith("USW1-"))
+			if (usageType.StartsWith("US-"))
+			{
+				// No change to region, is US East (Virginia)
+				item.UsageType = item.UsageType.Substring(3);
+			} 
+			else if (usageType.StartsWith("USW1-"))
 			{
 				code = "us-west-1";
-				name = "US West (California) Region";
+				name = "US West (North California) Region";
 				item.UsageType = item.UsageType.Substring(5);
 			}
 			else if (usageType.StartsWith("USW2-"))
@@ -171,10 +230,28 @@ namespace Eleven41.AmazonAWS.Billing
 				name = "US West (Oregon) Region";
 				item.UsageType = item.UsageType.Substring(5);
 			}
-			else if (usageType.StartsWith("EUW1-"))
+			else if (usageType.StartsWith("EU-"))
 			{
 				code = "eu-west-1";
 				name = "EU West (Ireland) Region";
+				item.UsageType = item.UsageType.Substring(5);
+			}
+			else if (usageType.StartsWith("APS1-"))
+			{
+				code = "ap-southeast-1";
+				name = "Asia Pacific (Singapore) Region";
+				item.UsageType = item.UsageType.Substring(5);
+			}
+			else if (usageType.StartsWith("APN1-"))
+			{
+				code = "ap-northeast-1";
+				name = "Asia Pacific (Tokyo) Region";
+				item.UsageType = item.UsageType.Substring(5);
+			}
+			else if (usageType.StartsWith("UGW1-"))
+			{
+				code = "sa-east-1";
+				name = "South America (Sao Paulo) Region";
 				item.UsageType = item.UsageType.Substring(5);
 			}
 
@@ -195,20 +272,28 @@ namespace Eleven41.AmazonAWS.Billing
 			return region;
 		}
 
+		// Format the specified number to 0, 3 or 6 decimal digits as necessary.
+		// If the number is very small, then use 6 digits.
+		// If the number is a whole number, then use 0.
+		// Otherwise, use 3.
 		private static string Format3Or6(double d)
 		{
 			string result = d.ToString("N3");
 			if (result == "0.000")
 			{
+				// The number is very small and cannot be represented by 3 decimal digits.
+				// Use 6 instead.
 				result = d.ToString("#,0.######");
 			}
 			else if (result.EndsWith(".000"))
 			{
+				// The number is a whole number, so remove the decimal.
 				result = result.Substring(0, result.Length - 4);
 			}
 			return result;
 		}
 
+		// Use FileHelper to parse the CSV file into line items.
 		private static AwsCsvItem[] ParseCsv(System.IO.TextReader reader)
 		{
 			List<AwsCsvItem> results = new List<AwsCsvItem>();
@@ -227,14 +312,6 @@ namespace Eleven41.AmazonAWS.Billing
 			engine.Close();
 
 			return results.ToArray();
-		}
-
-		private static DateTime? GetDateTime(string s)
-		{
-			if (String.IsNullOrEmpty(s))
-				return null;
-
-			return DateTime.Parse(s);
 		}
 	}
 }

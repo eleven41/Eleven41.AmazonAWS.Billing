@@ -26,14 +26,17 @@ namespace Eleven41.AmazonAWS.Billing
 		public string RecordID;
 
 		[FieldConverter(ConverterKind.Date, "yyyy/MM/dd HH:mm:ss")]
+		//[FieldConverter(ConverterKind.Date, "M/d/yyyy H:mm")]
 		[FieldQuoted(QuoteMode.OptionalForRead)]
 		public DateTime? BillingPeriodStartDate;
 
 		[FieldConverter(ConverterKind.Date, "yyyy/MM/dd HH:mm:ss")]
+		//[FieldConverter(ConverterKind.Date, "M/d/yyyy H:mm")]
 		[FieldQuoted(QuoteMode.OptionalForRead)]
 		public DateTime? BillingPeriodEndDate;
 
 		[FieldConverter(ConverterKind.Date, "yyyy/MM/dd HH:mm:ss")]
+		//[FieldConverter(ConverterKind.Date, "M/d/yyyy H:mm")]
 		[FieldQuoted(QuoteMode.OptionalForRead)]
 		public DateTime? InvoiceDate;
 
@@ -71,10 +74,12 @@ namespace Eleven41.AmazonAWS.Billing
 		public string ItemDescription;
 
 		[FieldConverter(ConverterKind.Date, "yyyy/MM/dd HH:mm:ss")]
+		//[FieldConverter(ConverterKind.Date, "M/d/yyyy H:mm")]
 		[FieldQuoted(QuoteMode.OptionalForRead)]
 		public DateTime? UsageStartDate;
 
 		[FieldConverter(ConverterKind.Date, "yyyy/MM/dd HH:mm:ss")]
+		//[FieldConverter(ConverterKind.Date, "M/d/yyyy H:mm")]
 		[FieldQuoted(QuoteMode.OptionalForRead)]
 		public DateTime? UsageEndDate;
 

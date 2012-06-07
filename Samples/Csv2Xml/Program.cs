@@ -22,6 +22,17 @@ namespace Csv2Xml
 			
 			var statement = Eleven41.AmazonAWS.Billing.BillingCsv.ReadFile(inputCsv);
 
+			foreach (var account in statement.Accounts)
+			{
+				Console.WriteLine("Account: {0}", account.AccountId);
+				foreach (var invoice in account.Invoices)
+				{
+					Console.WriteLine("\tInvoice: {0}", invoice.InvoiceId);
+					Console.WriteLine("\tInvoice Total: {0}", invoice.Total);
+				}
+			}
+			Console.WriteLine("Statement Total: ${0:F2}", statement.Total);
+
 			using (var fileStream = new FileStream(outputXml, FileMode.Create))
 			{
 				SerializeToStream(statement, fileStream);
