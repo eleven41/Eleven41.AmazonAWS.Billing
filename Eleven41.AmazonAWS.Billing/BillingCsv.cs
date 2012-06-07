@@ -196,8 +196,6 @@ namespace Eleven41.AmazonAWS.Billing
 			// These products don't use regions
 			if (product.ProductCode == "AmazonRoute53")
 				return null;
-			else if (product.ProductCode == "AWSDataTransfer")
-				return null;
 			else if (product.ProductCode == "AmazonSES")
 				return null;
 
