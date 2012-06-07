@@ -234,7 +234,7 @@ namespace Eleven41.AmazonAWS.Billing
 			{
 				code = "eu-west-1";
 				name = "EU West (Ireland) Region";
-				item.UsageType = item.UsageType.Substring(5);
+				item.UsageType = item.UsageType.Substring(3);
 			}
 			else if (usageType.StartsWith("APS1-"))
 			{
