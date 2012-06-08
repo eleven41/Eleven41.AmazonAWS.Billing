@@ -187,11 +187,13 @@ namespace Eleven41.AmazonAWS.Billing
 
 			// Default to US East
 			string code = "us-east-1";
-			string name = "US East (Virginia) Region";
+			string name = "US East (Northern Virginia) Region";
 
 			// S3 uses a different name for US East
 			if (product.ProductCode == "AmazonS3")
 				name = "US Standard Region";
+			else if (product.ProductCode == "AWSDataTransfer")
+				name = "US East (Northern Virginia) and US Standard Regions";
 
 			// If usage type starts with special prefixes, then that means
 			// it belongs to a particular region that is not US East.
@@ -203,7 +205,7 @@ namespace Eleven41.AmazonAWS.Billing
 			else if (usageType.StartsWith("USW1-"))
 			{
 				code = "us-west-1";
-				name = "US West (North California) Region";
+				name = "US West (Northern California) Region";
 				item.UsageType = item.UsageType.Substring(5);
 			}
 			else if (usageType.StartsWith("USW2-"))
