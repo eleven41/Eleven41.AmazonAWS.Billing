@@ -18,9 +18,7 @@ This library will process an Amazon Web Services billing CSV file and generate a
  * Account
   * Invoice
    * Product
-    * Region
-     * Line items
-    * Non-region Line Items
+    * Line items
      
 
 The goal is to get the object model in a format where the activity reports can be re-created.
