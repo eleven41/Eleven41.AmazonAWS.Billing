@@ -285,7 +285,7 @@ namespace Eleven41.AmazonAWS.Billing
 			else if (operation == "LoadBalancing")
 			{
 				code = operation;
-				name = "Elastic Load Balancer";
+				name = "Elastic Load Balancing";
 			}
 			else if (operation == "RunInstances")
 			{
