@@ -277,6 +277,11 @@ namespace Eleven41.AmazonAWS.Billing
 				name = "Elastic IP Addresses";
 				item.UsageType = item.UsageType.Substring(10);
 			}
+			else if (usageType.StartsWith("SpotUsage:"))
+			{
+				code = "SpotUsage";
+				name = "Spot Instances";
+			}
 			else if (operation == "LoadBalancing")
 			{
 				code = operation;
