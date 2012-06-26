@@ -251,7 +251,8 @@ namespace Eleven41.AmazonAWS.Billing
 
 		private static void SetItemCategory(AwsLineItem item, AwsProduct product, string operation)
 		{
-			if (product.ProductCode != "AmazonEC2")
+			if (product.ProductCode != "AmazonEC2" &&
+				product.ProductCode != "AmazonRDS")
 				return;
 
 			string usageType = item.UsageType;
@@ -301,6 +302,22 @@ namespace Eleven41.AmazonAWS.Billing
 			{
 				code = operation;
 				name = "Amazon EC2 running Windows with SQL Server";
+			}
+			else if (operation == "CreateDBInstance" ||
+				usageType == "RDS:StorageIOUsage")
+			{
+				code = "CreateDBInstance";
+				name = "Amazon RDS Storage";
+			}
+			else if (usageType == "RDS:ChargedBackupUsage")
+			{
+				code = usageType;
+				name = "Amazon RDS Automated Backups";
+			}
+			else if (operation == "CreateDBInstance:0002")
+			{
+				code = operation;
+				name = "Amazon RDS for MySQL Community Edition";
 			}
 
 			item.Category = code;
